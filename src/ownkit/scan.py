@@ -3,30 +3,32 @@ from __future__ import annotations
 from pathlib import Path
 
 from ownkit.finding import Report, Severity
-from ownkit.modules import config, deps, git, perms, secrets
+from ownkit.modules import ci, config, deps, docker, git, perms, secrets
+
+DEFAULT_MODULES = ["secrets", "config", "deps", "docker", "ci", "git", "perms"]
+
+_RUNNERS = {
+    "secrets": secrets.scan,
+    "config": config.scan,
+    "deps": deps.scan,
+    "perms": perms.scan,
+    "docker": docker.scan,
+    "ci": ci.scan,
+}
 
 
 def run_modules(root: Path, names: list[str]) -> Report:
-    report = Report()
-    mapping = {
-        "secrets": lambda: secrets.scan(root),
-        "config": lambda: config.scan(root),
-        "deps": lambda: deps.scan(root),
-        "perms": lambda: perms.scan(root),
-    }
+    report = Report(path=str(root), modules=list(names))
     for name in names:
         if name == "git":
             items, notes = git.scan(root)
             report.extend(items)
             report.notes.extend(notes)
-        elif name in mapping:
-            report.extend(mapping[name]())
+        elif name in _RUNNERS:
+            report.extend(_RUNNERS[name](root))
         else:
             report.notes.append(f"unknown module: {name}")
     return report
-
-
-DEFAULT_MODULES = ["secrets", "config", "perms", "git"]
 
 
 def fail_on_from_name(name: str) -> Severity | None:

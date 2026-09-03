@@ -1,6 +1,6 @@
 # ownkit
 
-Defensive security toolkit for **systems and repos you own**. Kali-shaped in the sense that it is a small collection of checks under one CLI, not a pentest distro.
+Defensive security toolkit for **systems and repos you own**. A small collection of checks under one CLI. Not a pentest distro.
 
 Sibling of [ownscan](https://github.com/Badg3r3u/ownscan): ownscan stays the focused secrets/misconfig scanner. ownkit is the suite.
 
@@ -8,10 +8,12 @@ Sibling of [ownscan](https://github.com/Badg3r3u/ownscan): ownscan stays the foc
 
 | Command | Check |
 | --- | --- |
-| `ownkit scan` | Default set: secrets, config, perms (and git history if `.git` exists) |
+| `ownkit scan` | Default set: secrets, config, deps, docker, ci, perms (git history if `.git` exists) |
 | `ownkit secrets` | Pattern scan for leaked keys/tokens in a local tree |
 | `ownkit config` | Project misconfig (committed `.env`, debug flags, compose bound to `0.0.0.0`) |
-| `ownkit deps` | Unpinned requirements / wildcard versions in your lockfiles |
+| `ownkit deps` | Unpinned requirements / wildcard versions |
+| `ownkit docker` | Dockerfile `:latest`, missing `USER`, privileged compose, docker.sock mounts |
+| `ownkit ci` | GitHub Actions `pull_request_target` and secrets echoed into logs |
 | `ownkit git` | Same secret patterns in recent git history |
 | `ownkit perms` | World-writable files and overly open SSH private keys |
 
