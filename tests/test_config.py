@@ -16,3 +16,11 @@ def test_config_flags_env_and_compose():
 def test_deps_flags_unpinned():
     findings = deps.scan(ROOT)
     assert any(f.id == "deps.unpinned" and "requests" in f.title for f in findings)
+
+
+def test_config_flags_dockerfile_and_cors():
+    findings = config.scan(ROOT)
+    ids = {f.id for f in findings}
+    assert "config.dockerfile_missing_user" in ids
+    assert "config.cors_wildcard" in ids
+    assert all(f.remediation for f in findings)
