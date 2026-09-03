@@ -39,9 +39,11 @@ PATTERNS: list[tuple[str, re.Pattern[str], Severity, str]] = [
 
 
 def _iter_files(root: Path) -> list[Path]:
+    if root.is_file():
+        return [root]
     files: list[Path] = []
     for path in root.rglob("*"):
-        if not path.is_file():
+        if not path.is_file() or path.is_symlink():
             continue
         if any(part in SKIP_DIRS for part in path.parts):
             continue
@@ -52,37 +54,43 @@ def _iter_files(root: Path) -> list[Path]:
 
 
 def scan(root: Path) -> list[Finding]:
+    from ownkit.finding import redact_evidence
+
+    root = Path(root)
     findings: list[Finding] = []
-    seen: set[tuple[str, str]] = set()
+    seen: set[tuple[str, str, int]] = set()
+    display_root = root if root.is_dir() else root.parent
     for path in _iter_files(root):
         try:
             if path.stat().st_size > MAX_BYTES:
                 continue
-            text = path.read_text(encoding="utf-8", errors="ignore")
+            data = path.read_bytes()
         except OSError:
             continue
+        if b"\x00" in data[:8192]:
+            continue
         try:
-            rel = str(path.relative_to(root))
+            rel = path.relative_to(display_root).as_posix()
         except ValueError:
-            rel = str(path)
-        for rule_id, pattern, severity, remediation in PATTERNS:
-            for match in pattern.finditer(text):
-                key = (rule_id, rel)
-                if key in seen:
-                    continue
-                seen.add(key)
-                evidence = match.group(0)
-                if len(evidence) > 12:
-                    evidence = evidence[:8] + "…"
-                findings.append(
-                    Finding(
-                        id=rule_id,
-                        module="secrets",
-                        severity=severity,
-                        path=rel,
-                        title="Possible secret in source tree",
-                        evidence=evidence,
-                        remediation=remediation,
+            rel = path.as_posix()
+        body = data.decode("utf-8", errors="ignore")
+        for lineno, line in enumerate(body.splitlines(), 1):
+            for rule_id, pattern, severity, remediation in PATTERNS:
+                for match in pattern.finditer(line):
+                    key = (rule_id, rel, lineno)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    findings.append(
+                        Finding(
+                            id=rule_id,
+                            module="secrets",
+                            severity=severity,
+                            path=rel,
+                            title="Possible secret in source tree",
+                            evidence=redact_evidence(line, match.group(0)),
+                            remediation=remediation,
+                            line=lineno,
+                        )
                     )
-                )
     return findings
