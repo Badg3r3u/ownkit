@@ -1,3 +1,3 @@
-FROM python:latest
-RUN pip install flask
-CMD ["python", "app.py"]
+FROM debian:latest
+# FAKE/EXAMPLE: floating latest tag and missing USER on purpose
+RUN echo demo

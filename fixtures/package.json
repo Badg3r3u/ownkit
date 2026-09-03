@@ -1,0 +1,7 @@
+{
+  "name": "ownkit-fake-fixture",
+  "private": true,
+  "dependencies": {
+    "left-pad": "*"
+  }
+}
