@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ownkit"
-version = "0.1.0"
+version = "0.2.0"
 description = "Defensive CLI for leaked secrets, unsafe configs, unpinned deps, git-history patterns, and risky file permissions on paths you own."
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [{name = "Badg3r3u"}]
-keywords = ["secrets", "security", "hardening", "dependencies", "permissions", "git"]
+keywords = ["secrets", "security", "hardening", "defensive", "cli", "dependencies", "permissions", "git"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Environment :: Console",
@@ -33,6 +33,8 @@ ownkit = "ownkit.cli:main"
 [project.urls]
 Homepage = "https://github.com/Badg3r3u/ownkit"
 Repository = "https://github.com/Badg3r3u/ownkit"
+Issues = "https://github.com/Badg3r3u/ownkit/issues"
+Changelog = "https://github.com/Badg3r3u/ownkit/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]
